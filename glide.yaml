@@ -8,3 +8,6 @@ import:
   version: ^1.0.0
   subpackages:
   - gomock
+- package: github.com/nsqio/go-nsq
+  version: ^1.0.7
+- package: github.com/bouk/monkey

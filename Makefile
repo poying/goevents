@@ -1,5 +1,5 @@
 test: mocks
-	@go test .
+	@go test ./...
 
 requirements:
 	@go get github.com/golang/mock/mockgen

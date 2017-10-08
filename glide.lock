@@ -1,10 +1,16 @@
-hash: 4a929397b7bfae2e8e242bd6c4dea374acb4cb4766e291f0f0752691bdea6627
-updated: 2017-10-08T13:52:42.877150622+08:00
+hash: 0af78d14468fbdde15f97883ffa78fdd2d784b6e85f8cb1e69a85e72def4b503
+updated: 2017-10-08T16:06:21.136439809+08:00
 imports:
+- name: github.com/bouk/monkey
+  version: b96e337f6e5b36906584cd0cf9803bbab09284f7
 - name: github.com/golang/mock
   version: 13f360950a79f5864a972c786a10a50e44b69541
   subpackages:
   - gomock
+- name: github.com/golang/snappy
+  version: 553a641470496b2327abcac10b36396bd98e45c9
+- name: github.com/nsqio/go-nsq
+  version: eee57a3ac4174c55924125bb15eeeda8cffb6e6f
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/stretchr/testify

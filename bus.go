@@ -25,6 +25,11 @@ func NewBus(producer Producer, consumer Consumer) *Bus {
 	return bus
 }
 
+// RegisterPayloadType regiters payload type to payload encoder/decoder
+func (bus *Bus) RegisterPayloadType(payloadType EventPayload) {
+	gob.Register(payloadType)
+}
+
 // Publish publishs an event
 func (bus *Bus) Publish(topic string, payload EventPayload) error {
 	event := newEvent(topic, payload)
