@@ -11,3 +11,4 @@ import:
 - package: github.com/nsqio/go-nsq
   version: ^1.0.7
 - package: github.com/bouk/monkey
+- package: github.com/adjust/redismq

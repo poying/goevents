@@ -10,8 +10,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/poying/goevents"
+	"github.com/poying/goevents/local"
 	mocks "github.com/poying/goevents/mocks"
-	"github.com/poying/goevents/queue/local"
 )
 
 type Payload struct {

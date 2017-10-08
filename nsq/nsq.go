@@ -18,6 +18,7 @@ type Consumer struct {
 // AddHandler adds a message handler to consumer
 func (consumer *Consumer) AddHandler(handler goevents.MessageHandler) {
 	consumer.consumer.AddHandler(gonsq.HandlerFunc(func(nsqMessage *gonsq.Message) error {
+		defer nsqMessage.Finish()
 		return handler.HandleMessage(&Message{message: nsqMessage})
 	}))
 }

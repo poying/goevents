@@ -1,6 +1,8 @@
-hash: 0af78d14468fbdde15f97883ffa78fdd2d784b6e85f8cb1e69a85e72def4b503
-updated: 2017-10-08T16:06:21.136439809+08:00
+hash: e5a43a964ef9ced605823606dcfcc6335a021c2428f9d434a06e266f3ab4e3cc
+updated: 2017-10-08T22:33:05.592244999+08:00
 imports:
+- name: github.com/adjust/redismq
+  version: e2a56d9bb404cb0e47cc737fdc3fe1fd6c095743
 - name: github.com/bouk/monkey
   version: b96e337f6e5b36906584cd0cf9803bbab09284f7
 - name: github.com/golang/mock
