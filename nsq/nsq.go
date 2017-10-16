@@ -6,7 +6,7 @@ import (
 )
 
 // NewBus creates an event bus
-func NewBus(producer *gonsq.Producer, consumer *gonsq.Consumer) *goevents.Bus {
+func NewBus(producer *gonsq.Producer, consumer *gonsq.Consumer) goevents.Bus {
 	return goevents.NewBus(producer, &Consumer{consumer: consumer})
 }
 

@@ -7,7 +7,13 @@ import (
 )
 
 // Bus represents event bus
-type Bus struct {
+type Bus interface {
+	RegisterPayloadType(payload EventPayload)
+	Publish(topic string, payload EventPayload) error
+	AddHandler(handler EventHandler)
+}
+
+type bus struct {
 	lock     *sync.RWMutex
 	producer Producer
 	consumer Consumer
@@ -15,23 +21,23 @@ type Bus struct {
 }
 
 // NewBus creates an event bus
-func NewBus(producer Producer, consumer Consumer) *Bus {
-	bus := &Bus{
+func NewBus(producer Producer, consumer Consumer) Bus {
+	b := &bus{
 		lock:     &sync.RWMutex{},
 		producer: producer,
 		consumer: consumer,
 	}
-	consumer.AddHandler(bus)
-	return bus
+	consumer.AddHandler(&funcHandler{handler: b.handleMessage})
+	return b
 }
 
 // RegisterPayloadType regiters payload type to payload encoder/decoder
-func (bus *Bus) RegisterPayloadType(payloadType EventPayload) {
+func (b *bus) RegisterPayloadType(payloadType EventPayload) {
 	gob.Register(payloadType)
 }
 
 // Publish publishs an event
-func (bus *Bus) Publish(topic string, payload EventPayload) error {
+func (b *bus) Publish(topic string, payload EventPayload) error {
 	event := newEvent(topic, payload)
 	var body bytes.Buffer
 	enc := gob.NewEncoder(&body)
@@ -39,11 +45,10 @@ func (bus *Bus) Publish(topic string, payload EventPayload) error {
 	if err != nil {
 		return err
 	}
-	return bus.producer.Publish(topic, body.Bytes())
+	return b.producer.Publish(topic, body.Bytes())
 }
 
-// HandleMessage decodes messages which are received from message queue and pass them to event handlers
-func (bus *Bus) HandleMessage(message Message) error {
+func (b *bus) handleMessage(message Message) error {
 	var event Event
 	body, err := message.Decode()
 	gobDecoder := gob.NewDecoder(bytes.NewReader(body))
@@ -51,9 +56,9 @@ func (bus *Bus) HandleMessage(message Message) error {
 	if err != nil {
 		return err
 	}
-	bus.lock.RLock()
-	defer bus.lock.RUnlock()
-	for _, handler := range bus.handlers {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+	for _, handler := range b.handlers {
 		err = handler.HandleEvent(event)
 		if err != nil {
 			return err
@@ -64,8 +69,16 @@ func (bus *Bus) HandleMessage(message Message) error {
 }
 
 // AddHandler adds an event handler
-func (bus *Bus) AddHandler(handler EventHandler) {
-	bus.lock.Lock()
-	defer bus.lock.Unlock()
-	bus.handlers = append(bus.handlers, handler)
+func (b *bus) AddHandler(handler EventHandler) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	b.handlers = append(b.handlers, handler)
+}
+
+type funcHandler struct {
+	handler func(message Message) error
+}
+
+func (handler *funcHandler) HandleMessage(message Message) error {
+	return handler.handler(message)
 }
