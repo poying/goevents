@@ -1,6 +1,7 @@
 package local_test
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -30,16 +31,16 @@ func TestBus(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	bus := local.NewBus()
-	bus.RegisterPayloadType(Payload{})
 	handler := mocks.NewMockEventHandler(ctrl)
 	bus.AddHandler(handler)
+	rawPayload, _ := json.Marshal(Payload{Message: "Hello"})
 	event := goevents.Event{
 		Topic:       "hello",
-		ID:          id.Bytes(),
-		Payload:     Payload{Message: "Hello"},
+		ID:          id.String(),
+		Payload:     string(rawPayload),
 		EmittedTime: now,
 	}
 	handler.EXPECT().HandleEvent(event).Times(1)
-	err := bus.Publish("hello", event.Payload)
+	err := bus.Publish("hello", Payload{Message: "Hello"})
 	assert.Nil(t, err)
 }

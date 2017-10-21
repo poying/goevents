@@ -10,17 +10,24 @@ import (
 	nsqevents "github.com/poying/goevents/nsq"
 )
 
+type Nested struct {
+	Time time.Time
+}
+
 type Payload struct {
+	Nested
 	Message string
 }
 
 type EventHandler struct{}
 
 func (handler *EventHandler) HandleEvent(event goevents.Event) error {
-	switch payload := event.Payload.(type) {
-	case Payload:
-		fmt.Println(payload.Message)
+	payload := Payload{}
+	err := event.Scan(&payload)
+	if err != nil {
+		return err
 	}
+	fmt.Println(payload.Time, payload.Message)
 	return nil
 }
 
@@ -38,14 +45,16 @@ func main() {
 	}
 	bus := nsqevents.NewBus(producer, consumer)
 
-	bus.RegisterPayloadType(Payload{})
 	bus.AddHandler(&EventHandler{})
 	err = consumer.ConnectToNSQD("127.0.0.1:4150")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	err = bus.Publish("topic", Payload{Message: "Rocket Man"})
+	err = bus.Publish("topic", Payload{
+		Nested{Time: time.Now()},
+		"Rocket Man",
+	})
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

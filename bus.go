@@ -1,14 +1,12 @@
 package goevents
 
 import (
-	"bytes"
-	"encoding/gob"
+	"encoding/json"
 	"sync"
 )
 
 // Bus represents event bus
 type Bus interface {
-	RegisterPayloadType(payload EventPayload)
 	Publish(topic string, payload EventPayload) error
 	AddHandler(handler EventHandler)
 }
@@ -31,28 +29,20 @@ func NewBus(producer Producer, consumer Consumer) Bus {
 	return b
 }
 
-// RegisterPayloadType regiters payload type to payload encoder/decoder
-func (b *bus) RegisterPayloadType(payloadType EventPayload) {
-	gob.Register(payloadType)
-}
-
 // Publish publishs an event
 func (b *bus) Publish(topic string, payload EventPayload) error {
 	event := newEvent(topic, payload)
-	var body bytes.Buffer
-	enc := gob.NewEncoder(&body)
-	err := enc.Encode(event)
+	body, err := json.Marshal(event)
 	if err != nil {
 		return err
 	}
-	return b.producer.Publish(topic, body.Bytes())
+	return b.producer.Publish(topic, body)
 }
 
 func (b *bus) handleMessage(message Message) error {
 	var event Event
 	body, err := message.Decode()
-	gobDecoder := gob.NewDecoder(bytes.NewReader(body))
-	err = gobDecoder.Decode(&event)
+	err = json.Unmarshal(body, &event)
 	if err != nil {
 		return err
 	}
